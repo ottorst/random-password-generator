@@ -1,62 +1,55 @@
 <?php
-
-$password = "";
-$charCount = readline("How many characters should the password be : ");
-$capitalChars = readline("How many capital characters : ");
-$specialChars = readline("How many special characters : ");
-$numericChars = readline("How many numeric characters : ");
-
-function validateInput($input){
-    $input == '0'? $input = -1 : $input = intval($input); 
-
-    if($input == 0){
-        echo 'ERROR: input error, all entries must be numbers.';
-        die();
-    }
-    return $input;
+function validateInput($input)
+{
+	if (!is_numeric($input) || $input <= 0) {
+		echo 'ERROR: input error, all entries must be numbers.';
+		die();
+	}
+	return (int)$input;
 }
 
-$charCount = validateInput($charCount);
-$capitalChars = validateInput($capitalChars);
-$specialChars = validateInput($specialChars);
-$numericChars = validateInput($numericChars);
+function generatePassword($chars, $charType)
+{
+	$charList = [
+		'capital' => 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
+		'special' => '!?.',
+		'numeric' => '0123456789',
+		'regular' => 'abcdefghijklmnopqrstuvwxyz',
+	];
 
-if($charCount < ($specialChars + $capitalChars + $numericChars)){
-    echo 'ERROR: input error, the sum of all the types of characters, must be less than the total character count';
-    die();
+	$password = '';
+	for ($i = 0; $i < $chars; $i++) {
+		$randomIndex = rand(0, strlen($charList[$charType]) - 1);
+		$password .= $charList[$charType][$randomIndex];
+	}
+	return $password;
 }
 
-function generatePassword($chars, $charType){
-    $password = "";
-    $charList = array(
-        'regular'=>array("a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"),
-        'capital' =>array("A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"),
-        'numeric' => array('1','2','3','4','5','6','7','8'.'9'.'0'),
-        'special' => array("!", "?", ".")
-    );
-    
-    $randomNumbers = array_rand($charList[$charType], $chars);
-    if(gettype($randomNumbers) == 'array'){
-    foreach ($randomNumbers as $randomNumber => $value) {
-    $password .= $charList[$charType][$value];
-    }
-    }
-    else{
-        $password .= $charList[$charType][$randomNumbers];
-    }
-    return $password;
+$charCount = validateInput(readline("How many characters should the password be : "));
+$capitalChars = validateInput(readline("How many capital characters : "));
+$specialChars = validateInput(readline("How many special characters : "));
+$numericChars = validateInput(readline("How many numeric characters : "));
+
+if ($charCount < ($specialChars + $capitalChars + $numericChars)) {
+	echo 'ERROR: input error, the sum of all the types of characters, must be less than the total character count';
+	die();
 }
-if($capitalChars > 0)
-    $password .= generatePassword($capitalChars, 'capital', $password);
 
-if($specialChars > 0)
-    $password .= generatePassword($specialChars, 'special', $password);
-
-if($numericChars > 0)
-    $password .= generatePassword($numericChars, 'numeric', $password);
-$regularChars = $charCount - ($specialChars + $capitalChars + $numericChars);
-if($regularChars > 0)
-    $password .= generatePassword($regularChars, 'regular', $password);
+$password = '';
+for ($i = 0; $i < $charCount; $i++) {
+	if ($capitalChars > 0) {
+		$password .= generatePassword(1, 'capital');
+		$capitalChars--;
+	} elseif ($specialChars > 0) {
+		$password .= generatePassword(1, 'special');
+		$specialChars--;
+	} elseif ($numericChars > 0) {
+		$password .= generatePassword(1, 'numeric');
+		$numericChars--;
+	} else {
+		$password .= generatePassword(1, 'regular');
+	}
+}
 
 $password = str_shuffle($password);
-echo 'Your password is : '. $password;
+echo 'Your password is : ' . $password;
